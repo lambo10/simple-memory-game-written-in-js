@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <script src="jquery-3.1.1.js"></script>
+        <script src="prefixfree.min.js"></script>
+        <title>Memory Train</title>
+
+        <link rel="stylesheet" type="text/css" href="bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="w3.css">
+
+        <style>
+            * {
+     user-select: none;
+     -webkit-user-select: none;
+     -ms-user-select: none;
+     -moz-user-select: none;
+ }
+body {
+    margin: 0;
+}
+#cards {
+    width: 100vw;
+    height: 100vh;
+    border-collapse: collapse;
+    padding: 0;
+    table-layout: fixed;
+}
+td {
+    box-shadow: 0 0 1px #333 inset;
+    text-align: center;
+    overflow: hidden;
+    font-size: 30pt;
+    color: #FFF;
+    background: #9D9;
+    transition: all 500ms ease-in-out, color 250ms ease-in-out, background 250ms ease-in-out;
+}
+
+.down {
+    transform: rotateX(180deg);
+    -webkit-transform: rotateX(180deg);
+    color: transparent;
+    background: #7D7;
+}
+.disabled {
+    background: #AEA;
+}
+    .addsSize1{
+    width: 100%;
+    height: 17%;;
+}
+
+.addsSize2{
+    width: 100%;
+    height: 26%;
+}
+
+.dividerTT{
+    display: block;
+}
+@media(max-width:480px){
+    .addsSize1{
+    width: 100%;
+    height: 25%;;
+}
+
+.addsSize2{
+    width: 100%;
+    height: 26%;
+}
+
+.dividerTT{
+    display: none;
+}
+}
+        </style>
+    </head>
+    <body onload="sinValueP()"><br><br><br><br>
+        <table id="cards" border="0">
+            <tr>
+                <td class="down"></td>
+                <td class="down"></td>
+                <td class="down"></td>
+                <td class="down"></td>
+            </tr>
+            <tr>
+                <td class="down"></td>
+                <td class="down"></td>
+                <td class="down"></td>
+                <td class="down"></td>
+            </tr>
+            <tr>
+                <td class="down"></td>
+                <td class="down"></td>
+                <td class="down"></td>
+                <td class="down"></td>
+            </tr>
+            <tr>
+                <!-- d -->
+                <td class="down"></td>
+                <td class="down"></td>
+                <td class="down"></td>
+                <td class="down"></td>
+            </tr>
+        </table>
+       
+
+<div class="w3-text-black" style="position: absolute;" id="SavedSpins"><br><div>Spins: <span id="">0</span></div></div>
+
+    </body>
+    <script>
+        $(function(){
+    var empty = new Object();
+    var opened = {
+        "1" : new Object(),
+        "2" : new Object()
+    };
+    var moves = 0;
+    var clicks = 0;
+    var time = $.now();
+    function unflip(){
+    setTimeout(function(){
+    var one = $(opened["1"]);
+    var two = $(opened["2"]);
+    if(one.text() != two.text()){
+        one.toggleClass("down");
+        two.toggleClass("down");
+    }
+    else{
+        one.off("click");
+        two.off("click");
+        one.attr("name", true);
+        two.attr("name", true);
+        one.addClass("disabled");
+        two.addClass("disabled");
+        var win = false;
+        for(var i = 0; i < 16; i++){
+            var name = $("td").eq(i).attr("name");
+            if(name && name != false){
+                win = true;
+            }
+            else{
+                win = false;
+                break;
+            }
+        }
+        if(win == true){
+            var restart = confirm("You Won!\nMoves: " + moves + "\nPress \"OK\" to start a New Game!");
+            if(restart){
+                setup(true);
+                moves = 0;
+            }else{}
+        }else{}
+    }
+        opened = {
+        "1" : new Object(),
+        "2" : new Object()
+    };
+        }, 500);
+    }
+    function clicked(){
+    if(time){
+    if(parseInt($.now()) - parseInt(time) >= 500){
+    ++clicks;
+    ++moves;
+    time = $.now();
+    if($(this).hasClass("click")){
+        $(this).removeClass("click");
+        $(this).addClass("down");
+        opened["1"] = new Object();
+        clicks = 0;
+    }
+    else{
+        $(this).addClass("click");
+        if(clicks >= 2){
+            opened["2"] = $(this);
+            unflip();
+            clicks = 0;
+            $("td").removeClass("click")
+        }
+        else{
+            opened["1"] = $(this)
+        }
+        $(this).toggleClass("down");
+    }}else{}
+    }else{}
+    }
+    $("td").on("click", clicked);
+    function setup(retry){
+    if(retry){
+        $("td").on("click", clicked);
+        $("td").toggleClass("down");
+    }
+        var used = {
+            "0" : false,
+            "1" : false,
+            "2" : false,
+            "3" : false,
+            "4" : false,
+            "5" : false,
+            "6" : false,
+            "7" : false,
+            "8" : false,
+            "9" : false,
+            "10" : false,
+            "11" : false,
+            "12" : false,
+            "13" : false,
+            "14" : false,
+            "15" : false
+        }
+        function random(){
+            var rand = (Math.floor(Math.random() * 16));
+            while(used[rand] == true){
+                rand = (Math.floor(Math.random() * 16));
+            }
+            used[rand] = true;
+            return rand;
+        }
+        var icons = [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H"
+        ];
+        for(i in icons){
+            var ico = icons[i];
+            var one = $("td").eq(random());
+            var two = $("td").eq(random());
+            $(one).text(ico);
+            $(two).text(ico);
+        }
+        $("td").removeAttr("name");
+        $("td").removeClass("disabled");
+    }
+    setup();
+});    
+    </script>
+
+    <script type="text/javascript">
+        function sinValueP(){
+            var wVSO = window.innerWidth
+|| document.documentElement.clientWidth
+|| document.body.clientWidth;
+
+var hVSO = window.innerHeight
+|| document.documentElement.clientHeight
+|| document.body.clientHeight;
+
+document.getElementById("SavedSpins").style.top=((5*hVSO)/100);
+document.getElementById("SavedSpins").style.right=((10*wVSO)/100);
+
+        }
+    </script>
+</html>
